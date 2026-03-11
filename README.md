@@ -49,4 +49,15 @@ Para gerar a versão de produção:
 ```bash
 npm run build
 ```
-teste atualização
+## Implantação no Vercel
+
+Para subir este projeto no Vercel através do GitHub:
+
+1.  Crie um novo projeto no [Vercel](https://vercel.com).
+2.  Conecte seu repositório do GitHub.
+3.  Nas **Environment Variables** (Variáveis de Ambiente), adicione:
+    -   `VITE_SUPABASE_URL`: Sua URL do Supabase.
+    -   `VITE_SUPABASE_ANON_KEY`: Sua Anon Key do Supabase.
+4.  Clique em **Deploy**.
+
+O Vercel detectará automaticamente as configurações do Vite e fará o build do projeto.

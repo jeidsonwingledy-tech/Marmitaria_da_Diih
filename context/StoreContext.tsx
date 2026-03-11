@@ -341,9 +341,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     if (supabase) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id: _, ...rest } = updates;
-        await supabase.from('settings').update(rest).eq('id', 'info');
+        await supabase.from('settings').update(updates).eq('id', 'info');
         notify('Informações atualizadas!');
       } catch { notify('Erro ao salvar informações', 'error'); }
       return;
