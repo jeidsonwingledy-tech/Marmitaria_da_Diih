@@ -63,6 +63,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <MapPin size={22} />
                 <span className="text-[10px] mt-1">Local</span>
               </Link>
+
+              <Link to="/admin" className={`flex flex-col items-center justify-center w-full h-full ${isActive('/admin')}`}>
+                <Settings size={22} />
+                <span className="text-[10px] mt-1">Admin</span>
+              </Link>
             </div>
           </div>
         )}
