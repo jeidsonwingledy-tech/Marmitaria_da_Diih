@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Home, UtensilsCrossed, ShoppingCart, MapPin, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '../context/StoreContext';
@@ -8,7 +8,6 @@ import SupabaseConfigBanner from './SupabaseConfigBanner';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { cartCount } = useStore();
 
   const isActive = (path: string) => location.pathname === path ? "text-primary font-bold" : "text-gray-500";
