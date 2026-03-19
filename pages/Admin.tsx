@@ -25,7 +25,7 @@ const Admin = () => {
     menuItems,
     addMenuItem,
     updateMenuItem,
-    categories,
+    categorias,
     addCategory,
     updateCategory,
     removeCategory,
@@ -40,11 +40,11 @@ const Admin = () => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(isAdminMode);
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'config'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'categorias' | 'config'>('dashboard');
 
   // Menu Item Form State
   const [isAddingItem, setIsAddingItem] = useState(false);
-  const defaultNewItem: Partial<MenuItem> = { categoryId: categories[0]?.id || '', name: '', description: '', price: 0, images: [], optionGroups: [], available: true };
+  const defaultNewItem: Partial<MenuItem> = { categoryId: categorias[0]?.id || '', name: '', description: '', price: 0, images: [], optionGroups: [], available: true };
   const [newItem, setNewItem] = useState<Partial<MenuItem>>(defaultNewItem);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
@@ -268,7 +268,7 @@ const Admin = () => {
         <NavItem id="dashboard" icon={PieChart} label="Visão" activeTab={activeTab} setActiveTab={setActiveTab} />
         <NavItem id="orders" icon={ListOrdered} label="Pedidos" activeTab={activeTab} setActiveTab={setActiveTab} />
         <NavItem id="menu" icon={Coffee} label="Cardápio" activeTab={activeTab} setActiveTab={setActiveTab} />
-        <NavItem id="categories" icon={Tags} label="Categorias" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <NavItem id="categorias" icon={Tags} label="Categorias" activeTab={activeTab} setActiveTab={setActiveTab} />
         <NavItem id="config" icon={Settings} label="Config" activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
@@ -398,8 +398,8 @@ const Admin = () => {
           </div>
         )}
 
-        {/* TAB: CATEGORIES */}
-        {activeTab === 'categories' && (
+        {/* TAB: CATEGORIAS */}
+        {activeTab === 'categorias' && (
           <div className="bg-white rounded-2xl p-4 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <div>
@@ -425,7 +425,7 @@ const Admin = () => {
             </div>
 
             <div className="space-y-3">
-              {categories.map(cat => (
+              {categorias.map(cat => (
                 <div key={cat.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-white">
                   <span className="font-medium text-gray-700">{cat.name}</span>
                   <div className="flex items-center gap-3">
@@ -475,7 +475,7 @@ const Admin = () => {
                     <input required placeholder="Nome do Produto" value={currentFormItem.name || ''} onChange={e => setCurrentFormItem({ ...currentFormItem, name: e.target.value })} className="p-3 bg-white border border-gray-200 rounded-xl outline-none font-bold" />
                   </div>
                   <select value={currentFormItem.categoryId || ''} onChange={e => setCurrentFormItem({ ...currentFormItem, categoryId: e.target.value })} className="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none">
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {categorias.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <textarea placeholder="Descrição" value={currentFormItem.description || ''} onChange={e => setCurrentFormItem({ ...currentFormItem, description: e.target.value })} className="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none h-20 resize-none" />
 
@@ -536,7 +536,7 @@ const Admin = () => {
                   <img src={item.images[0]} className="w-16 h-16 rounded-xl object-cover bg-gray-100" />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-gray-800 leading-tight">{item.name}</h4>
-                    <p className="text-xs text-gray-500">{categories.find(c => c.id === item.categoryId)?.name}</p>
+                    <p className="text-xs text-gray-500">{categorias.find(c => c.id === item.categoryId)?.name}</p>
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-gray-400">
                       <Layout size={10} /> {item.optionGroups.length} variações
                     </div>

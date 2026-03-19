@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { MenuItem } from '../types';
 import { formatCurrency } from '../utils/formatters';
-import { useStore } from '../context/StoreContext';
+
 import { ImageEditable } from './ui/ImageEditable';
 import { ProductModal } from './ProductModal';
 

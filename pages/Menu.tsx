@@ -1,16 +1,44 @@
-import React, { useState } from 'react';
-import { useStore } from '../context/StoreContext';
+import React, { useState, useEffect } from 'react';
 import { ProductCard } from '../components/ProductCard';
+import { supabase } from '../services/supabase';
+import { Category, MenuItem } from '../types';
+
+interface DBProduct extends Omit<MenuItem, 'categoryId'> {
+  category_id: string;
+}
 
 const Menu = () => {
-  const { menuItems, categories } = useStore();
-  // Filter active categories
-  const activeCategories = categories.filter(c => c.active);
-  const [activeCategory, setActiveCategory] = useState(activeCategories[0]?.id || '');
+  const [produtos, setProdutos] = useState<DBProduct[]>([]);
+  const [categoriasDB, setCategoriasDB] = useState<Category[]>([]);
+
+  useEffect(() => {
+    async function carregarDados() {
+      const { data: produtosData } = await supabase
+        .from('produtos')
+        .select('*');
+
+      const { data: categoriasData } = await supabase
+        .from('categorias')
+        .select('*');
+
+      console.log('PRODUTOS:', produtosData);
+      console.log('CATEGORIAS:', categoriasData);
+
+      if (produtosData) setProdutos(produtosData);
+      if (categoriasData) setCategoriasDB(categoriasData);
+    }
+
+    carregarDados();
+  }, []);
+
+  const activeCategorias = categoriasDB.filter(c => c.active);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const activeCategory = selectedCategory || (activeCategorias.length > 0 ? activeCategorias[0].id : '');
 
   // Scroll category into view when clicked
   const handleCategoryClick = (id: string) => {
-    setActiveCategory(id);
+    setSelectedCategory(id);
     const element = document.getElementById(`category-${id}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -20,11 +48,11 @@ const Menu = () => {
   return (
     <div className="pt-4">
       <h2 className="text-2xl font-bold px-4 mb-4" style={{ color: 'var(--color-text)' }}>Cardápio</h2>
-      
+
       {/* Category Sticky Header */}
       <div className="sticky top-0 z-40 py-2 border-b border-gray-100 shadow-sm" style={{ backgroundColor: 'var(--color-bg)', opacity: 0.95 }}>
         <div className="flex overflow-x-auto no-scrollbar px-4 gap-2 pb-2">
-          {activeCategories.map((cat) => (
+          {activeCategorias.map((cat) => (
             <button
               key={cat.id}
               onClick={() => handleCategoryClick(cat.id)}
@@ -41,8 +69,8 @@ const Menu = () => {
       </div>
 
       <div className="p-4 space-y-8 pb-20">
-        {activeCategories.map((category) => {
-          const items = menuItems.filter(item => item.categoryId === category.id && item.available);
+        {activeCategorias.map((category) => {
+          const items = produtos.filter(item => item.category_id === category.id && item.available);
           if (items.length === 0) return null;
 
           return (
@@ -53,7 +81,7 @@ const Menu = () => {
               </h3>
               <div className="grid grid-cols-1 gap-6">
                 {items.map((item) => (
-                  <ProductCard key={item.id} item={item} />
+                  <ProductCard key={item.id} item={{ ...item, categoryId: item.category_id, images: item.images || [] } as MenuItem} />
                 ))}
               </div>
             </div>
