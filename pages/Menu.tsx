@@ -3,18 +3,14 @@ import { ProductCard } from '../components/ProductCard';
 import { supabase } from '../services/supabase';
 import { Category, MenuItem } from '../types';
 
-interface DBProduct extends Omit<MenuItem, 'categoryId'> {
-  category_id: string;
-}
-
 const Menu = () => {
-  const [produtos, setProdutos] = useState<DBProduct[]>([]);
+  const [produtos, setProdutos] = useState<MenuItem[]>([]);
   const [categoriasDB, setCategoriasDB] = useState<Category[]>([]);
 
   useEffect(() => {
     async function carregarDados() {
       const { data: produtosData } = await supabase
-        .from('produtos')
+        .from('menuItems')
         .select('*');
 
       const { data: categoriasData } = await supabase
@@ -24,7 +20,7 @@ const Menu = () => {
       console.log('PRODUTOS:', produtosData);
       console.log('CATEGORIAS:', categoriasData);
 
-      if (produtosData) setProdutos(produtosData);
+      if (produtosData) setProdutos(produtosData as MenuItem[]);
       if (categoriasData) setCategoriasDB(categoriasData);
     }
 
@@ -70,7 +66,7 @@ const Menu = () => {
 
       <div className="p-4 space-y-8 pb-20">
         {activeCategorias.map((category) => {
-          const items = produtos.filter(item => item.category_id === category.id && item.available);
+          const items = produtos.filter(item => item.categoryId === category.id && item.available);
           if (items.length === 0) return null;
 
           return (
@@ -81,7 +77,7 @@ const Menu = () => {
               </h3>
               <div className="grid grid-cols-1 gap-6">
                 {items.map((item) => (
-                  <ProductCard key={item.id} item={{ ...item, categoryId: item.category_id, images: item.images || [] } as MenuItem} />
+                  <ProductCard key={item.id} item={item} />
                 ))}
               </div>
             </div>

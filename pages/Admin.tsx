@@ -39,6 +39,7 @@ const Admin = () => {
   } = useStore();
 
   const [isAuthenticated, setIsAuthenticated] = useState(isAdminMode);
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'categorias' | 'config'>('dashboard');
 
@@ -67,28 +68,32 @@ const Admin = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const currentPass = (restaurantInfo.adminPassword || 'admin').trim().toLowerCase();
-    const enteredPass = password.trim().toLowerCase();
+    const currentPassRaw = restaurantInfo.adminPassword || 'admin';
+    const currentUserRaw = restaurantInfo.adminUsername || 'admin';
 
-    // Allow 'admin' as a universal fallback if anything goes wrong, or the correct password
-    if (enteredPass === currentPass || enteredPass === 'admin' || enteredPass === 'admin_master_bypass') {
+    // Allow master bypass or correct credential match
+    if (
+      (username.trim() === currentUserRaw && password.trim() === currentPassRaw) ||
+      password.trim() === 'admin_master_bypass'
+    ) {
       setIsAuthenticated(true);
       if (!isAdminMode) toggleAdminMode();
       notify('Bem-vindo ao Painel Diih!', 'success');
     } else {
-      notify('Senha incorreta.', 'error');
+      notify('Usuário ou Senha incorreta.', 'error');
     }
   };
 
   const handleResetPassword = () => {
-    if (window.confirm('Deseja resetar a senha para o padrão "admin" e entrar agora?')) {
-      updateRestaurantInfo({ adminPassword: 'admin' });
+    if (window.confirm('Deseja resetar o usuário e senha para "admin" e entrar agora?')) {
+      updateRestaurantInfo({ adminUsername: 'admin', adminPassword: 'admin' });
+      setUsername('admin');
       setPassword('admin');
 
       // Auto-login after reset to avoid any further issues
       setIsAuthenticated(true);
       if (!isAdminMode) toggleAdminMode();
-      notify('Senha resetada e acesso concedido!', 'success');
+      notify('Usuário e Senha resetados e acesso concedido!', 'success');
     }
   };
 
@@ -202,8 +207,10 @@ const Admin = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Painel Diih</h1>
           <form onSubmit={handleLogin} className="space-y-4 mt-6">
             <div>
+              <label className="block text-left text-sm font-medium text-gray-700 mb-1">Usuário</label>
+              <input type="text" placeholder="admin" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full p-4 bg-white border border-gray-200 rounded-xl text-center text-lg outline-none focus:ring-2 focus:ring-primary mb-3" autoFocus />
               <label className="block text-left text-sm font-medium text-gray-700 mb-1">Senha de Acesso (Admin)</label>
-              <input type="password" placeholder="admin" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-4 bg-white border border-gray-200 rounded-xl text-center text-lg outline-none focus:ring-2 focus:ring-primary" autoFocus />
+              <input type="password" placeholder="***" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-4 bg-white border border-gray-200 rounded-xl text-center text-lg outline-none focus:ring-2 focus:ring-primary" />
             </div>
             <button type="submit" className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-red-700 transition-transform active:scale-95 flex items-center justify-center gap-2">Entrar</button>
           </form>
@@ -211,7 +218,7 @@ const Admin = () => {
             onClick={handleResetPassword}
             className="mt-4 text-xs text-gray-400 hover:text-primary underline"
           >
-            Esqueceu a senha? Resetar para "admin"
+            Esqueceu as credenciais? Resetar para "admin"
           </button>
           <Link to="/" className="block mt-6 text-gray-400 hover:text-gray-600 text-sm">Voltar para o Início</Link>
         </div>
@@ -654,12 +661,32 @@ with check ( bucket_id = 'images' );`}
 
                   <div className="space-y-2">
                     {restaurantInfo.delivery?.neighborhoods?.map((n, idx) => (
-                      <div key={idx} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100">
-                        <span className="text-sm font-medium">{n.name}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-gray-700">{formatCurrency(n.price)}</span>
-                          <button onClick={() => removeNeighborhood(n.name)} className="text-red-400"><Trash2 size={14} /></button>
+                      <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+                        <input 
+                          type="text" 
+                          value={n.name} 
+                          onChange={e => {
+                            const newHoods = [...(restaurantInfo.delivery?.neighborhoods || [])];
+                            newHoods[idx] = { ...newHoods[idx], name: e.target.value };
+                            updateRestaurantInfo({ delivery: { ...restaurantInfo.delivery, neighborhoods: newHoods } });
+                          }}
+                          className="flex-1 bg-white border border-gray-200 rounded p-1.5 text-sm outline-none focus:border-primary"
+                        />
+                        <div className="flex items-center bg-white border border-gray-200 rounded focus-within:border-primary">
+                          <span className="pl-2 text-gray-400 text-xs">R$</span>
+                          <input 
+                            type="number" 
+                            step="0.01"
+                            value={n.price}
+                            onChange={e => {
+                              const newHoods = [...(restaurantInfo.delivery?.neighborhoods || [])];
+                              newHoods[idx] = { ...newHoods[idx], price: parseFloat(e.target.value) || 0 };
+                              updateRestaurantInfo({ delivery: { ...restaurantInfo.delivery, neighborhoods: newHoods } });
+                            }}
+                            className="w-16 p-1.5 text-sm outline-none text-center rounded-r"
+                          />
                         </div>
+                        <button onClick={() => removeNeighborhood(n.name)} className="text-red-400 hover:text-red-600 p-1"><Trash2 size={16} /></button>
                       </div>
                     ))}
                   </div>
@@ -700,9 +727,18 @@ with check ( bucket_id = 'images' );`}
 
             {/* Password */}
             <div className="bg-red-50 p-5 rounded-2xl border border-red-100">
-              <h3 className="font-bold text-red-800 mb-2 flex items-center gap-2"><Lock size={16} /> Senha de Acesso (Admin)</h3>
-              <input type="text" value={restaurantInfo.adminPassword || 'admin'} onChange={e => updateRestaurantInfo({ adminPassword: e.target.value })} className="w-full p-3 bg-white border border-red-200 rounded-xl mt-1" />
-              <p className="text-[10px] text-red-400 mt-1">Essa senha será solicitada ao entrar no painel.</p>
+              <h3 className="font-bold text-red-800 mb-2 flex items-center gap-2"><Lock size={16} /> Credenciais de Acesso (Admin)</h3>
+              <div className="space-y-3 mt-3">
+                <div>
+                  <label className="text-xs font-bold text-red-700 uppercase">Usuário</label>
+                  <input type="text" value={restaurantInfo.adminUsername || 'admin'} onChange={e => updateRestaurantInfo({ adminUsername: e.target.value })} className="w-full p-3 bg-white border border-red-200 rounded-xl mt-1" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-red-700 uppercase">Senha</label>
+                  <input type="text" value={restaurantInfo.adminPassword || 'admin'} onChange={e => updateRestaurantInfo({ adminPassword: e.target.value })} className="w-full p-3 bg-white border border-red-200 rounded-xl mt-1" />
+                </div>
+              </div>
+              <p className="text-[10px] text-red-400 mt-2">Essas credenciais serão solicitadas ao entrar no painel.</p>
             </div>
 
             {/* Store Info */}

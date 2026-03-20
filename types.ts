@@ -67,6 +67,7 @@ export interface RestaurantInfo {
   instagramUrl: string; // New
   facebookUrl: string; // New
   adminPassword?: string; // New (optional, stored in localstorage usually)
+  adminUsername?: string;
   
   pixKey: string;
   pixKeyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';

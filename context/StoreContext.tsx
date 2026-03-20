@@ -123,22 +123,12 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           }
 
           // 2. Menu Items
-          const { data: items } = await supabase.from('produtos').select('*');
+          const { data: items } = await supabase.from('menuItems').select('*');
           if (items && items.length > 0) {
-            const formatted = items.map((p: any) => ({
-              id: p.id,
-              name: p.nome,
-              description: p.descricao,
-              price: p.preco_p,
-              categoryId: p.categoria_id,
-              available: true
-            }));
-
-            setMenuItems(formatted);
+            setMenuItems(items as MenuItem[]);
+          } else if (items && items.length === 0 && menuItems.length > 0) {
+            console.log("Produtos vazios no Supabase. Mantendo locais.");
           }
-        } else if (items && items.length === 0 && menuItems.length > 0) {
-          console.log("Produtos vazios no Supabase. Mantendo locais.");
-        }
 
         // 3. Restaurant Info
         const { data: info, error: infoError } = await supabase.from('settings').select('*').eq('id', 'info').single();
@@ -308,7 +298,7 @@ const removeCategory = async (id: string) => {
 const addMenuItem = async (item: Omit<MenuItem, 'id'>) => {
   if (supabase) {
     try {
-      await supabase.from('produtos').insert(item);
+      await supabase.from('menuItems').insert(item);
       notify('Produto criado com sucesso!');
     } catch { notify('Erro ao criar produto', 'error'); }
     return;
