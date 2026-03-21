@@ -52,7 +52,7 @@ export const ImageEditable: React.FC<ImageEditableProps> = ({ src, alt, classNam
       <img 
         src={src || 'https://via.placeholder.com/150?text=Sem+Imagem'} 
         alt={alt} 
-        className={`w-full h-full object-cover transition-opacity duration-300 ${isUploading ? 'opacity-50 blur-sm' : 'opacity-100'}`} 
+        className={`w-full h-full object-contain transition-opacity duration-300 ${isUploading ? 'opacity-50 blur-sm' : 'opacity-100'}`} 
         referrerPolicy="no-referrer"
       />
       

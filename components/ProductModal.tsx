@@ -95,7 +95,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ item, onClose }) => 
         </button>
 
         <div className="h-64 relative bg-gray-100 shrink-0">
-          <img src={item.images[currentImageIndex]} alt={item.name} className="w-full h-full object-cover" />
+          <img src={item.images[currentImageIndex]} alt={item.name} className="w-full h-full object-contain" />
           {item.images.length > 1 && (
             <>
               <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-1 rounded-full shadow-sm hover:bg-white text-gray-800"><ChevronLeft size={24} /></button>
