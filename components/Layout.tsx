@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, UtensilsCrossed, ShoppingCart, MapPin, Settings } from 'lucide-react';
+import { Home, UtensilsCrossed, ShoppingCart, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '../context/StoreContext';
 
