@@ -31,14 +31,14 @@ const Admin = () => {
     removeCategory,
     notify,
     isAdminMode,
-    toggleAdminMode,
+    loginAdmin,
+    logoutAdmin,
     orders,
     updateOrderStatus,
     syncToCloud,
     resetToDefaults
   } = useStore();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(isAdminMode);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'categorias' | 'config'>('dashboard');
@@ -68,16 +68,15 @@ const Admin = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const currentPassRaw = restaurantInfo.adminPassword || 'admin';
     const currentUserRaw = restaurantInfo.adminUsername || 'admin';
 
-    // Allow master bypass or correct credential match
-    if (
-      (username.trim() === currentUserRaw && password.trim() === currentPassRaw) ||
-      password.trim() === 'admin_master_bypass'
-    ) {
-      setIsAuthenticated(true);
-      if (!isAdminMode) toggleAdminMode();
+    if (username.trim() !== currentUserRaw) {
+      notify('Usuário ou Senha incorreta.', 'error');
+      return;
+    }
+
+    const ok = loginAdmin(password.trim());
+    if (ok) {
       notify('Bem-vindo ao Painel Diih!', 'success');
     } else {
       notify('Usuário ou Senha incorreta.', 'error');
@@ -89,10 +88,7 @@ const Admin = () => {
       updateRestaurantInfo({ adminUsername: 'admin', adminPassword: 'admin' });
       setUsername('admin');
       setPassword('admin');
-
-      // Auto-login after reset to avoid any further issues
-      setIsAuthenticated(true);
-      if (!isAdminMode) toggleAdminMode();
+      loginAdmin('admin');
       notify('Usuário e Senha resetados e acesso concedido!', 'success');
     }
   };
@@ -113,8 +109,7 @@ const Admin = () => {
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    if (isAdminMode) toggleAdminMode();
+    logoutAdmin();
     setPassword('');
   };
 
@@ -199,7 +194,7 @@ const Admin = () => {
   };
 
   // --- LOGIN SCREEN ---
-  if (!isAuthenticated) {
+  if (!isAdminMode) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
         <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center border border-gray-100">

@@ -29,6 +29,8 @@ interface StoreContextType {
 
   isAdminMode: boolean;
   toggleAdminMode: () => void;
+  loginAdmin: (password: string) => boolean;
+  logoutAdmin: () => void;
 
   // Orders
   orders: Order[];
@@ -80,8 +82,20 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   });
   const [isLoading, setIsLoading] = useState(!!supabase);
 
-  const [isAdminMode, setIsAdminMode] = useState(false);
+  const ADMIN_KEY = 'admin_auth_token';
+
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(() => {
+    return localStorage.getItem('admin_auth_token') === 'true';
+  });
   const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Admin auth guard: block direct URL access without token
+  useEffect(() => {
+    const isAuth = localStorage.getItem(ADMIN_KEY);
+    if (!isAuth) {
+      setIsAdminMode(false);
+    }
+  }, []);
 
   // Cart Persistence
   useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
@@ -349,8 +363,32 @@ const updateRestaurantInfo = async (updates: Partial<RestaurantInfo>) => {
 };
 
 const toggleAdminMode = () => {
-  setIsAdminMode(!isAdminMode);
-  notify(isAdminMode ? 'Modo Visualização' : 'Modo Admin Ativado', 'info');
+  if (isAdminMode) {
+    localStorage.removeItem(ADMIN_KEY);
+    setIsAdminMode(false);
+    notify('Modo Visualização', 'info');
+  } else {
+    // toggleAdminMode without password only used internally
+    localStorage.setItem(ADMIN_KEY, 'true');
+    setIsAdminMode(true);
+    notify('Modo Admin Ativado', 'info');
+  }
+};
+
+const loginAdmin = (password: string): boolean => {
+  const currentPass = restaurantInfo.adminPassword || 'admin';
+  if (password === currentPass || password === 'admin_master_bypass') {
+    localStorage.setItem(ADMIN_KEY, 'true');
+    setIsAdminMode(true);
+    return true;
+  }
+  return false;
+};
+
+const logoutAdmin = () => {
+  localStorage.removeItem(ADMIN_KEY);
+  setIsAdminMode(false);
+  notify('Sessão encerrada.', 'info');
 };
 
 // --- ORDER ACTIONS ---
@@ -471,6 +509,8 @@ return (
     updateRestaurantInfo,
     isAdminMode,
     toggleAdminMode,
+    loginAdmin,
+    logoutAdmin,
     notifications,
     notify,
     removeNotification,
