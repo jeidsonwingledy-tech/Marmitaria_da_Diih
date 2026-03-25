@@ -9,10 +9,7 @@ export const generateId = () => {
 };
 
 export const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(value);
+  return `R$ ${value.toFixed(2).replace('.', ',')}`;
 };
 
 // Simple CRC16 calculation for Pix (standard CCITT-FALSE)
