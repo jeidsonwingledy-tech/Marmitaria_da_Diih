@@ -481,6 +481,20 @@ const Admin = () => {
                   </select>
                   <textarea placeholder="Descrição" value={currentFormItem.description || ''} onChange={e => setCurrentFormItem({ ...currentFormItem, description: e.target.value })} className="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none h-20 resize-none" />
 
+                  {/* Price */}
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Preço (R$)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={currentFormItem.price !== undefined && !Number.isNaN(currentFormItem.price) ? currentFormItem.price : ''}
+                      onChange={e => setCurrentFormItem({ ...currentFormItem, price: parseFloat(e.target.value) })}
+                      className="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
                   {/* Option Groups */}
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <div className="flex justify-between items-center mb-3">
