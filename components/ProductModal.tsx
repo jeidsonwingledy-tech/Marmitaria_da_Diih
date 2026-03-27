@@ -35,6 +35,29 @@ export const ProductModal: React.FC<ProductModalProps> = ({ item, onClose }) => 
     });
   };
 
+  const handleOptionQuantityChange = (groupId: string, option: ProductOption, delta: number, maxGroup: number) => {
+    setSelectedOptions(prev => {
+      const current = prev[groupId] || [];
+      const currentCount = current.filter(o => o.id === option.id).length;
+      const totalInGroup = current.length;
+
+      if (delta > 0) {
+        if (totalInGroup >= maxGroup) return prev;
+        return { ...prev, [groupId]: [...current, option] };
+      } else {
+        if (currentCount > 0) {
+          const indexToRemove = current.findIndex(o => o.id === option.id);
+          const newCurrent = [...current];
+          if (indexToRemove !== -1) {
+            newCurrent.splice(indexToRemove, 1);
+          }
+          return { ...prev, [groupId]: newCurrent };
+        }
+        return prev;
+      }
+    });
+  };
+
   const validateSelection = () => {
     if (!item.optionGroups) return true;
     for (const group of item.optionGroups) {
@@ -138,26 +161,61 @@ export const ProductModal: React.FC<ProductModalProps> = ({ item, onClose }) => 
 
                 <div className="space-y-2">
                   {availableOptions.map(option => {
-                    const isSelected = !!(selectedOptions[group.id]?.some(o => o.id === option.id));
-                    return (
-                      <label key={option.id} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${isSelected ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-primary' : 'border-gray-300'}`}>
-                            {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    const isRadio = group.max === 1;
+                    const optionCount = (selectedOptions[group.id] || []).filter(o => o.id === option.id).length;
+                    const isSelected = optionCount > 0;
+                    
+                    if (isRadio) {
+                      return (
+                        <label key={option.id} className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${isSelected ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-primary' : 'border-gray-300'}`}>
+                              {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                            </div>
+                            <span className={`text-sm ${isSelected ? 'font-bold text-gray-900' : 'text-gray-700'}`}>{option.name}</span>
                           </div>
-                          <span className={`text-sm ${isSelected ? 'font-bold text-gray-900' : 'text-gray-700'}`}>{option.name}</span>
+                          <span className="text-sm font-medium text-gray-600">
+                            {option.price > 0 ? `+${formatCurrency(option.price)}` : 'Grátis'}
+                          </span>
+                          <input
+                            type="checkbox"
+                            className="hidden"
+                            checked={isSelected}
+                            onChange={() => handleOptionToggle(group.id, option, group.max, true)}
+                          />
+                        </label>
+                      );
+                    } else {
+                      return (
+                        <div key={option.id} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isSelected ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                          <div className="flex flex-col">
+                            <span className={`text-sm ${isSelected ? 'font-bold text-gray-900' : 'text-gray-700'}`}>{option.name}</span>
+                            <span className="text-xs font-medium text-gray-500">
+                              {option.price > 0 ? `+${formatCurrency(option.price)}` : 'Grátis'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-full p-1 shadow-sm">
+                            <button
+                              type="button"
+                              onClick={() => handleOptionQuantityChange(group.id, option, -1, group.max)}
+                              className="w-7 h-7 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 disabled:opacity-30"
+                              disabled={optionCount === 0}
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="text-sm font-bold w-4 text-center">{optionCount}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleOptionQuantityChange(group.id, option, 1, group.max)}
+                              className="w-7 h-7 flex items-center justify-center rounded-full text-primary hover:bg-red-50 disabled:opacity-30"
+                              disabled={(selectedOptions[group.id] || []).length >= group.max}
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <span className="text-sm font-medium text-gray-600">
-                          {option.price > 0 ? `+${formatCurrency(option.price)}` : 'Grátis'}
-                        </span>
-                        <input
-                          type="checkbox"
-                          className="hidden"
-                          checked={isSelected}
-                          onChange={() => handleOptionToggle(group.id, option, group.max, group.max === 1)}
-                        />
-                      </label>
-                    );
+                      );
+                    }
                   })}
                 </div>
               </div>
