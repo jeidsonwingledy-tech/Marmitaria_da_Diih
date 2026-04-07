@@ -159,21 +159,18 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           }));
         } else if (!infoError || infoError.code === 'PGRST116') {
           // Cloud is empty. DON'T overwrite local data with INITIAL_RESTAURANT_INFO.
-          // Instead, we'll offer a sync button in the UI or sync automatically if it's the first time.
-          console.log("Configurações vazias no Supabase. Mantendo locais.");
-          // Auto-sync settings if they are customized
-          if (JSON.stringify(restaurantInfo) !== JSON.stringify(INITIAL_RESTAURANT_INFO)) {
-            await supabase.from('settings').insert({ id: 'info', ...restaurantInfo });
-            console.log("Configurações locais sincronizadas automaticamente.");
-          }
+        if (info && !infoError) {
+          setRestaurantInfo(info as RestaurantInfo);
+          localStorage.setItem('db_settings', JSON.stringify(info));
         }
 
         // 4. Orders
-        const { data: ords } = await supabase.from('orders').select('*').order('createdAt', { ascending: false }).limit(50);
-        if (ords) setOrders(ords as Order[]);
-
-      } catch (error) {
-        console.error("Supabase fetch error:", error);
+        const { data: ordersData } = await supabase.from('orders').select('*').order('createdAt', { ascending: false }).limit(50);
+        if (ordersData) {
+          setOrders(ordersData as Order[]);
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
       } finally {
         setIsLoading(false);
       }
@@ -181,20 +178,33 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     fetchData();
 
-    // Realtime Subscriptions
-    const channel = supabase.channel('db-changes')
+    // Set up Realtime Subscriptions ONCE
+    const channel = supabase.channel('global-sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, payload => {
-        if (payload.eventType === 'INSERT') setCategorias(prev => [...prev, payload.new as Category]);
-        if (payload.eventType === 'UPDATE') setCategorias(prev => prev.map(c => c.id === payload.new.id ? payload.new as Category : c));
-        if (payload.eventType === 'DELETE') setCategorias(prev => prev.filter(c => c.id !== payload.old.id));
+        setCategorias(prev => {
+          let next;
+          if (payload.eventType === 'INSERT') next = [...prev, payload.new as Category];
+          else if (payload.eventType === 'UPDATE') next = prev.map(c => c.id === payload.new.id ? payload.new as Category : c);
+          else if (payload.eventType === 'DELETE') next = prev.filter(c => c.id !== payload.old.id);
+          else next = prev;
+          localStorage.setItem('db_categorias', JSON.stringify(next));
+          return next;
+        });
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'menuItems' }, payload => {
-        if (payload.eventType === 'INSERT') setMenuItems(prev => [...prev, payload.new as MenuItem]);
-        if (payload.eventType === 'UPDATE') setMenuItems(prev => prev.map(i => i.id === payload.new.id ? payload.new as MenuItem : i));
-        if (payload.eventType === 'DELETE') setMenuItems(prev => prev.filter(i => i.id !== payload.old.id));
+        setMenuItems(prev => {
+          let next;
+          if (payload.eventType === 'INSERT') next = [...prev, payload.new as MenuItem];
+          else if (payload.eventType === 'UPDATE') next = prev.map(i => i.id === payload.new.id ? payload.new as MenuItem : i);
+          else if (payload.eventType === 'DELETE') next = prev.filter(i => i.id !== payload.old.id);
+          else next = prev;
+          localStorage.setItem('db_menuItems', JSON.stringify(next));
+          return next;
+        });
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, payload => {
-        if (payload.eventType === 'UPDATE' && payload.new.id === 'info') setRestaurantInfo(payload.new as RestaurantInfo);
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'id=eq.info' }, payload => {
+        setRestaurantInfo(payload.new as RestaurantInfo);
+        localStorage.setItem('db_settings', JSON.stringify(payload.new));
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
         if (payload.eventType === 'INSERT') setOrders(prev => [payload.new as Order, ...prev]);
@@ -202,11 +212,10 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  } else {
-    setIsLoading(false);
-  }
-  }, [categorias.length, menuItems.length, restaurantInfo]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []); // Empty dependency array to run once on mount
 
 
 // Notification Helpers

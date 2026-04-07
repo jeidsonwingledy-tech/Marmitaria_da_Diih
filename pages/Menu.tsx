@@ -1,35 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { supabase } from '../services/supabase';
+import { useStore } from '../context/StoreContext';
 import { Category, MenuItem } from '../types';
 
 const Menu = () => {
-  const [produtos, setProdutos] = useState<MenuItem[]>([]);
-  const [categoriasDB, setCategoriasDB] = useState<Category[]>([]);
-
-  useEffect(() => {
-    async function carregarDados() {
-      const { data: produtosData } = await supabase
-        .from('menuItems')
-        .select('*');
-
-      const { data: categoriasData } = await supabase
-        .from('categorias')
-        .select('*');
-
-      console.log('PRODUTOS:', produtosData);
-      console.log('CATEGORIAS:', categoriasData);
-
-      if (produtosData) setProdutos(produtosData as MenuItem[]);
-      if (categoriasData) setCategoriasDB(categoriasData);
-    }
-
-    carregarDados();
-  }, []);
+  const { menuItems, categorias } = useStore();
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const normalize = (s: string) => s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  const activeCategorias = [...categoriasDB].filter(c => c.active).sort((a, b) => {
+  const activeCategorias = [...categorias].filter(c => c.active).sort((a, b) => {
     const defaultOrder = ['prato do dia', 'marmitas', 'porcoes', 'bebidas', 'sobremesas'];
     const indexA = defaultOrder.indexOf(normalize(a.name));
     const indexB = defaultOrder.indexOf(normalize(b.name));
@@ -38,7 +18,6 @@ const Menu = () => {
     if (indexB !== -1) return 1;
     return a.name.localeCompare(b.name);
   });
-  const [selectedCategory, setSelectedCategory] = useState('');
 
   const activeCategory = selectedCategory || (activeCategorias.length > 0 ? activeCategorias[0].id : '');
 
@@ -85,7 +64,7 @@ const Menu = () => {
 
       <div className="p-4 space-y-8 pb-20">
         {activeCategorias.map((category) => {
-          const items = produtos.filter(item => item.categoryId === category.id && item.available);
+          const items = menuItems.filter(item => item.categoryId === category.id && item.available);
           if (items.length === 0) return null;
 
           return (
