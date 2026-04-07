@@ -29,7 +29,8 @@ export interface MenuItem {
 export interface Category {
   id: string;
   name: string;
-  active: boolean; // Added active state
+  image?: string; // Added image for iFood-style circular icons
+  active: boolean; 
 }
 
 export interface CartItem extends MenuItem {

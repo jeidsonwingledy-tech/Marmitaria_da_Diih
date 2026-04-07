@@ -24,6 +24,7 @@ const AppContent = () => {
             <Route path="/cardapio" element={<Menu />} />
             <Route path="/carrinho" element={<Cart />} />
             <Route path="/localizacao" element={<Location />} />
+            <Route path="/pedidos" element={<QRCodePage />} />
             <Route path="/qrcode" element={<QRCodePage />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Navigate to="/" replace />} />

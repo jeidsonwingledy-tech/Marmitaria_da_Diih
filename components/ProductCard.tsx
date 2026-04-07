@@ -32,59 +32,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
   return (
     <>
       <div
-        className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white py-4 flex gap-4 border-b border-gray-100 hover:bg-gray-50/50 transition-colors cursor-pointer group"
         onClick={() => setIsModalOpen(true)}
       >
-        <div className="h-40 w-full overflow-hidden bg-gray-100 relative" onClick={(e) => e.stopPropagation()}>
+        {/* Info Column */}
+        <div className="flex-1 flex flex-col justify-between min-h-[100px]">
+          <div>
+            <h3 className="font-semibold text-[15px] text-gray-800 leading-snug group-hover:text-primary transition-colors">
+              {item.name}
+            </h3>
+            <p className="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed">
+              {item.description}
+            </p>
+          </div>
+          
+          <div className="mt-2 flex items-center gap-3">
+            <span className="font-bold text-sm text-gray-800">
+              {item.price > 0 ? formatCurrency(item.price) : 'Consulte'}
+            </span>
+            {item.price === 0 && (
+              <span className="text-[10px] bg-red-50 text-primary px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                Sob Consulta
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Image Column */}
+        <div className="w-28 h-24 rounded-lg overflow-hidden bg-gray-50 relative shrink-0">
           <ImageEditable
             src={mainImage}
             alt={item.name}
             onUpdate={handleImageUpdate}
-            className="w-full h-full"
+            className="w-full h-full object-cover"
           />
-          {item.images.length > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm">
-              +{item.images.length - 1} fotos
-            </div>
-          )}
-        </div>
-        <div className="p-4 flex flex-col flex-1">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-bold text-gray-800 text-lg leading-tight">{item.name}</h3>
-          </div>
-          <p className="text-gray-500 text-sm mb-4 line-clamp-2 flex-1">{item.description}</p>
-          <div className="flex justify-between items-center mt-auto">
-            {(() => {
-              const sizesGroup = item.optionGroups?.find(g => g.title === 'Tamanhos');
-              if (sizesGroup) {
-                const priceP = sizesGroup.options.find(o => o.name === 'P')?.price;
-                const priceM = sizesGroup.options.find(o => o.name === 'M')?.price;
-                if (priceP !== undefined && priceM !== undefined) {
-                  return (
-                    <div className="flex gap-2 text-sm font-bold text-primary whitespace-nowrap">
-                      <span>P: {formatCurrency(priceP)}</span>
-                      <span className="text-gray-300">|</span>
-                      <span>M: {formatCurrency(priceM)}</span>
-                    </div>
-                  );
-                }
-              }
-              return item.price > 0 ? (
-                <span className="font-bold text-lg text-primary">{formatCurrency(item.price)}</span>
-              ) : (
-                <span className="font-bold text-sm text-gray-400">A partir de {formatCurrency(0)}</span>
-              );
-            })()}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsModalOpen(true);
-              }}
-              className="bg-secondary text-white p-2 rounded-lg hover:bg-black transition-colors active:scale-95"
-              aria-label={`Configurar ${item.name}`}
-            >
-              <Plus size={20} />
-            </button>
+          <div className="absolute bottom-1 right-1">
+             <div className="bg-white shadow-sm p-1.5 rounded-full text-primary hover:scale-110 transition-transform">
+                <Plus size={16} strokeWidth={3} />
+             </div>
           </div>
         </div>
       </div>

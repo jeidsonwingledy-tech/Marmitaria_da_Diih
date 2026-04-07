@@ -28,11 +28,11 @@ export const INITIAL_RESTAURANT_INFO: RestaurantInfo = {
   },
 
   style: {
-    primaryColor: '#DC2626',
-    priceColor: '#DC2626',
-    backgroundColor: '#F9FAFB',
+    primaryColor: '#EA1D2C',
+    priceColor: '#EA1D2C',
+    backgroundColor: '#FFFFFF',
     cardColor: '#FFFFFF',
-    textColor: '#111827'
+    textColor: '#404040'
   },
 
   notice: {
@@ -42,11 +42,11 @@ export const INITIAL_RESTAURANT_INFO: RestaurantInfo = {
 };
 
 export const INITIAL_CATEGORIAS: Category[] = [
-  { id: 'pratododia', name: 'Prato do Dia', active: true },
-  { id: 'marmitas', name: 'Marmitas Tradicionais', active: true },
-  { id: 'fit', name: 'Linha Fit & Saudável', active: true },
-  { id: 'drinks', name: 'Bebidas Geladas', active: true },
-  { id: 'desserts', name: 'Sobremesas', active: true },
+  { id: 'pratododia', name: 'Prato do Dia', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&h=300&q=80', active: true },
+  { id: 'marmitas', name: 'Marmitas', image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=300&h=300&q=80', active: true },
+  { id: 'fit', name: 'Linha Fit', image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&h=300&q=80', active: true },
+  { id: 'drinks', name: 'Bebidas', image: 'https://images.unsplash.com/photo-1544145945-f904253d0c7b?auto=format&fit=crop&w=300&h=300&q=80', active: true },
+  { id: 'desserts', name: 'Sobremesas', image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=300&h=300&q=80', active: true },
 ];
 
 export const INITIAL_MENU: MenuItem[] = [
