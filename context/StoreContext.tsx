@@ -262,9 +262,17 @@ const addCategory = async (name: string) => {
 
   if (supabase) {
     try {
-      await supabase.from('categorias').insert(newItem);
-      notify('Categoria criada!');
-    } catch { notify('Erro ao criar categoria', 'error'); }
+      const { error } = await supabase.from('categorias').insert(newItem);
+      if (error) {
+        console.error("Erro ao criar categoria:", error);
+        notify('Erro ao criar categoria: ' + error.message, 'error');
+      } else {
+        notify('Categoria criada!');
+      }
+    } catch (err) { 
+      console.error("Excessão ao criar categoria:", err);
+      notify('Erro inesperado ao criar categoria', 'error'); 
+    }
     return;
   }
 
@@ -281,8 +289,15 @@ const updateCategory = async (id: string, updates: Partial<Category>) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id: _, ...rest } = updates;
-      await supabase.from('categorias').update(rest).eq('id', id);
-    } catch { notify('Erro ao atualizar', 'error'); }
+      const { error } = await supabase.from('categorias').update(rest).eq('id', id);
+      if (error) {
+        console.error("Erro ao atualizar categoria:", error);
+        notify('Erro ao atualizar categoria: ' + error.message, 'error');
+      }
+    } catch (err) { 
+      console.error("Excessão ao atualizar categoria:", err);
+      notify('Erro ao atualizar', 'error'); 
+    }
     return;
   }
 };
@@ -298,8 +313,15 @@ const removeCategory = async (id: string) => {
 
   if (supabase) {
     try {
-      await supabase.from('categorias').delete().eq('id', id);
-    } catch { notify('Erro ao excluir', 'error'); }
+      const { error } = await supabase.from('categorias').delete().eq('id', id);
+      if (error) {
+        console.error("Erro ao excluir categoria:", error);
+        notify('Erro ao excluir categoria: ' + error.message, 'error');
+      }
+    } catch (err) { 
+        console.error("Excessão ao excluir categoria:", err);
+        notify('Erro ao excluir', 'error'); 
+    }
     return;
   }
 };
@@ -307,9 +329,17 @@ const removeCategory = async (id: string) => {
 const addMenuItem = async (item: Omit<MenuItem, 'id'>) => {
   if (supabase) {
     try {
-      await supabase.from('menuItems').insert(item);
-      notify('Produto criado com sucesso!');
-    } catch { notify('Erro ao criar produto', 'error'); }
+      const { error } = await supabase.from('menuItems').insert(item);
+      if (error) {
+        console.error("Erro Supabase ao inserir produto:", error);
+        notify('Erro ao criar produto: ' + error.message, 'error');
+      } else {
+        notify('Produto criado com sucesso!');
+      }
+    } catch (err) { 
+      console.error("Excessão ao criar produto:", err);
+      notify('Erro inesperado ao criar produto', 'error'); 
+    }
     return;
   }
 
@@ -325,8 +355,15 @@ const updateMenuItem = async (id: string, updates: Partial<MenuItem>) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id: _, ...rest } = updates;
-      await supabase.from('menuItems').update(rest).eq('id', id);
-    } catch { notify('Erro ao atualizar produto', 'error'); }
+      const { error } = await supabase.from('menuItems').update(rest).eq('id', id);
+      if (error) {
+        console.error("Erro ao atualizar produto:", error);
+        notify('Erro ao atualizar produto: ' + error.message, 'error');
+      }
+    } catch (err) { 
+      console.error("Excessão ao atualizar produto:", err);
+      notify('Erro ao atualizar produto', 'error'); 
+    }
     return;
   }
 };
@@ -350,9 +387,17 @@ const updateRestaurantInfo = async (updates: Partial<RestaurantInfo>) => {
 
   if (supabase) {
     try {
-      await supabase.from('settings').update(updates).eq('id', 'info');
-      notify('Informações atualizadas!');
-    } catch { notify('Erro ao salvar informações', 'error'); }
+      const { error } = await supabase.from('settings').update(updates).eq('id', 'info');
+      if (error) {
+        console.error("Erro ao atualizar info:", error);
+        notify('Erro ao salvar info: ' + error.message, 'error');
+      } else {
+        notify('Informações atualizadas!');
+      }
+    } catch (err) { 
+      console.error("Excessão ao atualizar info:", err);
+      notify('Erro ao salvar informações', 'error'); 
+    }
     return;
   }
 };
