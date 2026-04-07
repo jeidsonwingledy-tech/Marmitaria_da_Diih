@@ -147,18 +147,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
         // 3. Restaurant Info
         const { data: info, error: infoError } = await supabase.from('settings').select('*').eq('id', 'info').single();
-
-        if (info) {
-          // Merge with current state to ensure nested objects like 'delivery' are not null
-          setRestaurantInfo(prev => ({
-            ...prev,
-            ...info,
-            delivery: info.delivery || prev.delivery || INITIAL_RESTAURANT_INFO.delivery,
-            style: info.style || prev.style || INITIAL_RESTAURANT_INFO.style,
-            notice: info.notice || prev.notice || INITIAL_RESTAURANT_INFO.notice
-          }));
-        } else if (!infoError || infoError.code === 'PGRST116') {
-          // Cloud is empty. DON'T overwrite local data with INITIAL_RESTAURANT_INFO.
         if (info && !infoError) {
           setRestaurantInfo(info as RestaurantInfo);
           localStorage.setItem('db_settings', JSON.stringify(info));
