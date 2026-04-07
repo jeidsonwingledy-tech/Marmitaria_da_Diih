@@ -125,25 +125,20 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // --- DATA LISTENERS (SUPABASE) ---
   useEffect(() => {
-    if (supabase) {
-      // --- SUPABASE LOGIC ---
-      const fetchData = async () => {
-        try {
-          // 1. Categorias
-          const { data: cats } = await supabase.from('categorias').select('*');
-          if (cats && cats.length > 0) {
-            setCategorias(cats as Category[]);
-          } else if (cats && cats.length === 0 && categorias.length > 0) {
-            console.log("Categorias vazias no Supabase. Mantendo locais.");
-          }
+    const fetchData = async () => {
+      if (!supabase) return;
+      try {
+        // 1. Categorias
+        const { data: cats } = await supabase.from('categorias').select('*');
+        if (cats && cats.length > 0) {
+          setCategorias(cats as Category[]);
+        }
 
-          // 2. Menu Items
-          const { data: items } = await supabase.from('menuItems').select('*');
-          if (items && items.length > 0) {
-            setMenuItems(items as MenuItem[]);
-          } else if (items && items.length === 0 && menuItems.length > 0) {
-            console.log("Produtos vazios no Supabase. Mantendo locais.");
-          }
+        // 2. Menu Items
+        const { data: items } = await supabase.from('menuItems').select('*');
+        if (items && items.length > 0) {
+          setMenuItems(items as MenuItem[]);
+        }
 
         // 3. Restaurant Info
         const { data: info, error: infoError } = await supabase.from('settings').select('*').eq('id', 'info').single();
@@ -165,6 +160,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
 
     fetchData();
+
+    if (!supabase) return;
 
     // Set up Realtime Subscriptions ONCE
     const channel = supabase.channel('global-sync')
@@ -203,7 +200,7 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
 
 // Notification Helpers
@@ -501,9 +498,7 @@ const resetToDefaults = () => {
     notify('Sistema resetado para os padrões.', 'info');
     window.location.reload();
   }
-};
-
-return (
+  return (
   <StoreContext.Provider value={{
     cart,
     addToCart,
