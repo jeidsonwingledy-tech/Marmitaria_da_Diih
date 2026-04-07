@@ -64,9 +64,15 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return saved ? JSON.parse(saved) : [];
   });
 
-  // State for Database Data - LOCKED TO CONSTANTS AS PER USER REQUEST
-  const [categorias, setCategorias] = useState<Category[]>(INITIAL_CATEGORIAS);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(INITIAL_MENU);
+  // State for Database Data
+  const [categorias, setCategorias] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('db_categorias');
+    return saved ? JSON.parse(saved) : INITIAL_CATEGORIAS;
+  });
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
+    const saved = localStorage.getItem('db_menuItems');
+    return saved ? JSON.parse(saved) : INITIAL_MENU;
+  });
   const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo>(() => {
     const saved = localStorage.getItem('db_settings');
     return saved ? JSON.parse(saved) : INITIAL_RESTAURANT_INFO;
@@ -123,13 +129,21 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       // --- SUPABASE LOGIC ---
       const fetchData = async () => {
         try {
-          // 1. Categorias (Fecthing only for debug, not setting state to keep constants as source of truth)
+          // 1. Categorias
           const { data: cats } = await supabase.from('categorias').select('*');
-          console.log("Categorias no Supabase:", cats?.length || 0);
+          if (cats && cats.length > 0) {
+            setCategorias(cats as Category[]);
+          } else if (cats && cats.length === 0 && categorias.length > 0) {
+            console.log("Categorias vazias no Supabase. Mantendo locais.");
+          }
 
-          // 2. Menu Items (Fecthing only for debug, not setting state to keep constants as source of truth)
+          // 2. Menu Items
           const { data: items } = await supabase.from('menuItems').select('*');
-          console.log("Produtos no Supabase:", items?.length || 0);
+          if (items && items.length > 0) {
+            setMenuItems(items as MenuItem[]);
+          } else if (items && items.length === 0 && menuItems.length > 0) {
+            console.log("Produtos vazios no Supabase. Mantendo locais.");
+          }
 
         // 3. Restaurant Info
         const { data: info, error: infoError } = await supabase.from('settings').select('*').eq('id', 'info').single();
@@ -167,9 +181,8 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     fetchData();
 
-    // Realtime Subscriptions (Menu and Categories are locked to code constants)
+    // Realtime Subscriptions
     const channel = supabase.channel('db-changes')
-      /* 
       .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, payload => {
         if (payload.eventType === 'INSERT') setCategorias(prev => [...prev, payload.new as Category]);
         if (payload.eventType === 'UPDATE') setCategorias(prev => prev.map(c => c.id === payload.new.id ? payload.new as Category : c));
@@ -180,7 +193,6 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         if (payload.eventType === 'UPDATE') setMenuItems(prev => prev.map(i => i.id === payload.new.id ? payload.new as MenuItem : i));
         if (payload.eventType === 'DELETE') setMenuItems(prev => prev.filter(i => i.id !== payload.old.id));
       })
-      */
       .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, payload => {
         if (payload.eventType === 'UPDATE' && payload.new.id === 'info') setRestaurantInfo(payload.new as RestaurantInfo);
       })
