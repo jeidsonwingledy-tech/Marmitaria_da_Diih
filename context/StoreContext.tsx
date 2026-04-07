@@ -498,7 +498,9 @@ const resetToDefaults = () => {
     notify('Sistema resetado para os padrões.', 'info');
     window.location.reload();
   }
-  return (
+};
+
+return (
   <StoreContext.Provider value={{
     cart,
     addToCart,
