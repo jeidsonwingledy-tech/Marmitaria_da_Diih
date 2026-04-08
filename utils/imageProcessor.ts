@@ -38,8 +38,8 @@ export const processImage = async (file: File): Promise<string> => {
         let width = img.width;
         let height = img.height;
         
-        // 3. Resize (Max 1200px for good quality/size balance)
-        const MAX_DIMENSION = 1200;
+        // 3. Resize (Max 800px for ideal quality/size balance in mobile apps)
+        const MAX_DIMENSION = 800;
 
         if (width > height) {
             if (width > MAX_DIMENSION) {
@@ -49,6 +49,7 @@ export const processImage = async (file: File): Promise<string> => {
         } else {
             if (height > MAX_DIMENSION) {
                 width = Math.round((width * MAX_DIMENSION) / height);
+                width = width; // keeping it clear
                 height = MAX_DIMENSION;
             }
         }
@@ -62,15 +63,14 @@ export const processImage = async (file: File): Promise<string> => {
             return;
         }
 
-        // Fill background with white for transparent PNGs converted to JPEG
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // WebP supports transparency, so no need for white background fill
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         ctx.drawImage(img, 0, 0, width, height);
 
-        // 4. Compress and Standardize (Always output generic JPEG for consistency)
-        // 0.85 quality provides good balance for menu photos
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        // 4. Compress and Standardize (Always output WebP for smallest file sizes)
+        // 0.7 quality provides excellent compression with minimal visual loss for food
+        const dataUrl = canvas.toDataURL('image/webp', 0.7);
         resolve(dataUrl);
       };
       img.onerror = () => reject(new Error('O arquivo selecionado está corrompido ou não é uma imagem válida.'));

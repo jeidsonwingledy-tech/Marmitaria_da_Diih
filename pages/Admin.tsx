@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Layout, Coffee, ArrowLeft, ImagePlus, X, Lock, Power, Edit3, Settings, PieChart, ListOrdered, Tags, Volume2, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useStore } from '../context/StoreContext';
+import { useUI } from '../context/UIContext';
+import { useAuth } from '../context/AuthContext';
+import { useProducts } from '../context/ProductContext';
+import { useOrders } from '../context/OrderContext';
 import { ImageEditable } from '../components/ui/ImageEditable';
 import { api } from '../services/api';
+import { supabase } from '../services/supabase';
+import { INITIAL_MENU, INITIAL_RESTAURANT_INFO, INITIAL_CATEGORIAS } from '../constants';
 import { MenuItem, ProductOptionGroup, ProductOption } from '../types';
 import { formatCurrency, generateId } from '../utils/formatters';
 
@@ -22,6 +27,17 @@ const Admin = () => {
   const {
     restaurantInfo,
     updateRestaurantInfo,
+    notify,
+    setIsLoading,
+  } = useUI();
+
+  const {
+    isAdminMode,
+    loginAdmin,
+    logoutAdmin,
+  } = useAuth();
+
+  const {
     menuItems,
     addMenuItem,
     updateMenuItem,
@@ -29,16 +45,52 @@ const Admin = () => {
     addCategory,
     updateCategory,
     removeCategory,
-    notify,
-    isAdminMode,
-    loginAdmin,
-    logoutAdmin,
+  } = useProducts();
+
+  const {
     orders,
     updateOrderStatus,
     clearOrders,
-    syncToCloud,
-    resetToDefaults
-  } = useStore();
+  } = useOrders();
+
+  const syncToCloud = async () => {
+    if (!supabase) {
+      notify('Conecte o Supabase primeiro.', 'error');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      notify('Sincronizando dados com a nuvem...', 'info');
+
+      await supabase.from('settings').upsert({ id: 'info', ...restaurantInfo });
+
+      if (categorias.length > 0) {
+        await supabase.from('categorias').upsert(categorias);
+      }
+
+      if (menuItems.length > 0) {
+        await supabase.from('menuItems').upsert(menuItems);
+      }
+
+      notify('Dados sincronizados com sucesso!', 'success');
+    } catch (error) {
+      console.error("Erro na sincronização:", error);
+      notify('Falha na sincronização.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetToDefaults = () => {
+    if (window.confirm("Isso irá apagar todos os seus dados e restaurar os padrões de fábrica. Continuar?")) {
+      localStorage.clear();
+      notify('Sistema resetado para os padrões.', 'info');
+      window.location.reload();
+    }
+  };
+
+
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -455,7 +507,7 @@ const Admin = () => {
                       }}
                       className="col-span-2 mt-2 bg-gray-100 text-gray-600 py-2 rounded-lg font-bold text-xs flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
                     >
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" className="w-4 h-4" />
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" className="w-5 h-5 filter brightness-0 invert" loading="lazy" />
                       Contatar Cliente
                     </button>
                   </div>
@@ -528,7 +580,7 @@ const Admin = () => {
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {currentFormItem.images?.map((img, i) => (
                       <div key={i} className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden group">
-                        <img src={img} className="w-full h-full object-cover" />
+                        <img src={img} className="w-full h-full object-cover" loading="lazy" />
                         <button type="button" onClick={() => handleRemoveImage(i)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5"><X size={12} /></button>
                       </div>
                     ))}
@@ -627,7 +679,7 @@ const Admin = () => {
             <div className="space-y-3">
               {menuItems.map(item => (
                 <div key={item.id} className="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-3">
-                  <img src={item.images[0]} className="w-16 h-16 rounded-xl object-cover bg-gray-100" />
+                  <img src={item.images[0]} className="w-16 h-16 rounded-xl object-cover bg-gray-100" loading="lazy" />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-gray-800 leading-tight">{item.name}</h4>
                     <p className="text-xs text-gray-500">{categorias.find(c => c.id === item.categoryId)?.name}</p>

@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Camera, Loader2, UploadCloud } from 'lucide-react';
-import { useStore } from '../../context/StoreContext';
+import { useAuth } from '../../context/AuthContext';
+import { useUI } from '../../context/UIContext';
 import { api } from '../../services/api';
 
 interface ImageEditableProps {
@@ -13,7 +14,8 @@ interface ImageEditableProps {
 }
 
 export const ImageEditable: React.FC<ImageEditableProps> = ({ src, alt, className, onUpdate, overlayText = "Alterar Foto", editable }) => {
-  const { isAdminMode, notify } = useStore();
+  const { isAdminMode } = useAuth();
+  const { notify } = useUI();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   
@@ -54,6 +56,7 @@ export const ImageEditable: React.FC<ImageEditableProps> = ({ src, alt, classNam
         alt={alt} 
         className={`w-full h-full object-contain transition-opacity duration-300 ${isUploading ? 'opacity-50 blur-sm' : 'opacity-100'}`} 
         referrerPolicy="no-referrer"
+        loading="lazy"
       />
       
       {isUploading && (

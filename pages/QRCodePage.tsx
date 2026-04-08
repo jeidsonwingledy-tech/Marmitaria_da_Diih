@@ -1,9 +1,9 @@
 import React from 'react';
 import QRCode from 'react-qr-code';
-import { useStore } from '../context/StoreContext';
+import { useUI } from '../context/UIContext';
 
 const QRCodePage = () => {
-  const { restaurantInfo } = useStore();
+  const { restaurantInfo } = useUI();
   // In a real scenario, this would be the deployed URL. For now, it's the current window location.
   const appUrl = window.location.href.split('#')[0];
 

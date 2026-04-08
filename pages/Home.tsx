@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Star, Clock, ChevronRight, Search } from 'lucide-react';
-import { useStore } from '../context/StoreContext';
+import { useUI } from '../context/UIContext';
+import { useAuth } from '../context/AuthContext';
+import { useProducts } from '../context/ProductContext';
 import { ImageEditable } from '../components/ui/ImageEditable';
 import { ProductCard } from '../components/ProductCard';
 import { Category, MenuItem } from '../types';
 
 const Home = () => {
-  const { restaurantInfo, updateRestaurantInfo, isAdminMode, menuItems, categorias } = useStore();
+  const { restaurantInfo, updateRestaurantInfo } = useUI();
+  const { isAdminMode } = useAuth();
+  const { menuItems, categorias } = useProducts();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   // Filter items based on selected category or show all highlights
@@ -87,6 +91,7 @@ const Home = () => {
                   src={cat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'} 
                   alt={cat.name}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <span className={`text-[11px] text-center font-medium ${selectedCategoryId === cat.id ? 'text-primary' : 'text-gray-600'}`}>

@@ -1,6 +1,10 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { StoreProvider, useStore } from './context/StoreContext';
+import { UIProvider, useUI } from './context/UIContext';
+import { AuthProvider } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
+import { CartProvider } from './context/CartContext';
+import { OrderProvider } from './context/OrderContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
@@ -12,7 +16,7 @@ import { ToastContainer } from './components/ui/Toast.tsx';
 
 // Wrapper component to access context hooks
 const AppContent = () => {
-  const { notifications, removeNotification } = useStore();
+  const { notifications, removeNotification } = useUI();
 
   return (
     <>
@@ -37,9 +41,17 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <StoreProvider>
-      <AppContent />
-    </StoreProvider>
+    <UIProvider>
+      <AuthProvider>
+        <ProductProvider>
+          <CartProvider>
+            <OrderProvider>
+              <AppContent />
+            </OrderProvider>
+          </CartProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </UIProvider>
   );
 };
 

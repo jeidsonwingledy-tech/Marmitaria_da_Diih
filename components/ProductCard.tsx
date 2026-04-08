@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { MenuItem } from '../types';
 import { formatCurrency } from '../utils/formatters';
-import { useStore } from '../context/StoreContext';
+import { useProducts } from '../context/ProductContext';
 
 import { ImageEditable } from './ui/ImageEditable';
 import { ProductModal } from './ProductModal';
@@ -12,7 +12,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
-  const { updateMenuItem } = useStore();
+  const { updateMenuItem } = useProducts();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Helper to update the first image for admin consistency in the card view

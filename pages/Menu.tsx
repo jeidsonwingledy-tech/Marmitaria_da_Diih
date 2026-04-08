@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
-import { useStore } from '../context/StoreContext';
+import { useProducts } from '../context/ProductContext';
 import { Category, MenuItem } from '../types';
 
 const Menu = () => {
-  const { menuItems, categorias } = useStore();
+  const { menuItems, categorias } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const normalize = (s: string) => s.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

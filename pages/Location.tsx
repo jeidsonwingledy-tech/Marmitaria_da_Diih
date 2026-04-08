@@ -1,9 +1,9 @@
 import React from 'react';
 import { MapPin, Clock, Phone } from 'lucide-react';
-import { useStore } from '../context/StoreContext';
+import { useUI } from '../context/UIContext';
 
 const Location = () => {
-  const { restaurantInfo } = useStore();
+  const { restaurantInfo } = useUI();
 
   return (
     <div className="p-0">

@@ -2,13 +2,15 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, UtensilsCrossed, ShoppingCart, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useStore } from '../context/StoreContext';
+import { useCart } from '../context/CartContext';
+import { useUI } from '../context/UIContext';
 
 import SupabaseConfigBanner from './SupabaseConfigBanner';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const { cartCount, restaurantInfo } = useStore();
+  const { cartCount } = useCart();
+  const { restaurantInfo } = useUI();
   const isActive = (path: string) => location.pathname === path ? "text-primary font-bold" : "text-gray-500";
 
   // Don't show bottom nav on admin page

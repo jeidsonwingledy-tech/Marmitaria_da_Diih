@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Minus, Plus, ShoppingBag, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MenuItem, ProductOption } from '../types';
-import { useStore } from '../context/StoreContext';
+import { useCart } from '../context/CartContext';
 import { formatCurrency } from '../utils/formatters';
 
 interface ProductModalProps {
@@ -11,7 +11,7 @@ interface ProductModalProps {
 }
 
 export const ProductModal: React.FC<ProductModalProps> = ({ item, onClose }) => {
-  const { addToCart } = useStore();
+  const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<{ [groupId: string]: ProductOption[] }>({});
@@ -118,7 +118,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ item, onClose }) => 
         </button>
 
         <div className="h-64 relative bg-gray-100 shrink-0">
-          <img src={item.images[currentImageIndex]} alt={item.name} className="w-full h-full object-contain" />
+          <img src={item.images[currentImageIndex]} alt={item.name} className="w-full h-full object-contain" loading="lazy" />
           {item.images.length > 1 && (
             <>
               <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-1 rounded-full shadow-sm hover:bg-white text-gray-800"><ChevronLeft size={24} /></button>

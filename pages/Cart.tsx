@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ArrowRight, ArrowLeft, Copy, Check, Calculator, QrCode, Utensils } from 'lucide-react';
-import { useStore } from '../context/StoreContext';
+import { useCart } from '../context/CartContext';
+import { useUI } from '../context/UIContext';
+import { useOrders } from '../context/OrderContext';
 import { formatCurrency, generatePixString } from '../utils/formatters';
 import { OrderDetails, ProductOption, CartItem } from '../types';
 import QRCode from 'react-qr-code';
@@ -24,7 +26,9 @@ interface LastOrderData {
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateQuantity, cartTotal, restaurantInfo, notify, addOrder, clearCart } = useStore();
+  const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
+  const { restaurantInfo, notify } = useUI();
+  const { addOrder } = useOrders();
   const [step, setStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -522,7 +526,7 @@ _Pedido feito pelo site Marmitaria da Diih_`;
 
           return (
             <div key={item.cartId} className="flex gap-4 p-4 rounded-xl shadow-sm border border-gray-100" style={{ backgroundColor: 'var(--color-card)' }}>
-              <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0"><img src={mainImage} alt={item.name} className="w-full h-full object-cover" /></div>
+              <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0"><img src={mainImage} alt={item.name} className="w-full h-full object-cover" loading="lazy" /></div>
               <div className="flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="font-bold text-gray-800">{item.name}</h3>

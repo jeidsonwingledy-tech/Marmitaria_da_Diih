@@ -6,25 +6,21 @@ export const api = {
    * Upload image to Storage (Supabase)
    */
   async uploadImage(file: File): Promise<string> {
-    // 1. Process and compress image client-side first
+    // 1. Process and compress image client-side first (Generates WebP)
     const dataUrl = await processImage(file);
     
     // Convert DataURL back to Blob for upload
     const response = await fetch(dataUrl);
     const blob = await response.blob();
 
-    // Generate unique path: images/{timestamp}_{filename}
+    // Generate unique path: images/{timestamp}_{filename}.webp
     const timestamp = Date.now();
-    const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const fileName = `${timestamp}_${cleanName}`;
+    const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, '_');
+    const fileName = `${timestamp}_${baseName}.webp`;
 
     // USE SUPABASE
     if (!supabase) {
-        const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        if (key && !key.startsWith('eyJ')) {
-            throw new Error("Configuração Supabase Inválida: A chave 'VITE_SUPABASE_ANON_KEY' não é um JWT válido. Use a 'anon public key' do painel do Supabase.");
-        }
-        throw new Error("Supabase não está configurado ou as chaves no ambiente estão incorretas.");
+        throw new Error("Supabase não está configurado.");
     }
 
     try {
@@ -33,8 +29,8 @@ export const api = {
         const { data, error } = await supabase.storage
             .from('images')
             .upload(fileName, blob, {
-                contentType: 'image/jpeg',
-                cacheControl: '3600',
+                contentType: 'image/webp',
+                cacheControl: '31536000', // 1 Year Cache
                 upsert: false
             });
 
